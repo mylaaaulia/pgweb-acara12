@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Kabupaten Sleman</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: calc(100vh - 56px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigasi Bar -->
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-map-location-dot"></i> WebGIS Kabupaten Sleman </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#infoModal"><i
+                                class="fa-solid fa-circle-info"></i> Info</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="map"></div>
+
+    <!-- Info Modal -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Info Pembuat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Nama</th>
+                            <td>Myla Aulia Syahida</td>
+                        </tr>
+                        <tr>
+                            <th>NIM</th>
+                            <td>23/522046/SV/23577</td>
+                        </tr>
+                        <tr>
+                            <th>Kelas</th>
+                            <td>B</td>
+                        </tr>
+                        <tr>
+                            <th>Github</th>
+                            <td><a href="https://github.com/mylaaaulia" target="_blank">Github</a></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/L.Geoserver.js"></script>
+    <script>
+        // Inisialisasi peta
+        var map = L.map('map').setView([-7.7956, 110.3695], 12);
+
+        var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 15,
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        });
+
+        osm.addTo(map);
+
+        // Batas Administrasi Sleman
+        var wmsLayer = L.tileLayer.wms("http://localhost:8080/geoserver/pgweb-12/wms", {
+            layers: "ADMINISTRASIDESA_AR_25K",
+            format: "image/png",
+            transparent: true,
+            version: "1.1.1",
+            attribution: "GeoServer"
+        }).addTo(map);
+
+        // Jalan Sleman 
+        var wmsLayer2 = L.Geoserver.wms("https://geoportal.slemankab.go.id/geoserver/wms", {
+            layers: "geonode:jalan_ln",
+            transparent: true,
+        });
+        wmsLayer2.addTo(map);
+
+        // Data Faskes Sleman 
+        var wmsLayer3 = L.Geoserver.wms("https://geoportal.slemankab.go.id/geoserver/wms", {
+            layers: "geonode:_3404_50kb_pt_fasilitas_kesehatan_lainnya_sleman_2019",
+            transparent: true,
+        });
+        wmsLayer3.addTo(map);
+
+        var layerLegend = L.Geoserver.legend("http://localhost:8080/geoserver/pgweb-12/wms", {
+            layers: "ADMINISTRASIDESA_AR_25K",
+            // style: stylefile,
+        });
+
+        layerLegend.addTo(map);
+
+        var baseMaps = {
+            "OpenStreetMap": osm
+        };
+
+        var overlayMaps = {
+            "Batas Administrasi Desa": wmsLayer,
+            "Jalan": wmsLayer2,
+            "Data Fasilitas Kesehatan": wmsLayer3
+        };
+
+        var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+    </script>
+</body>
+
+</html>
